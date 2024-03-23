@@ -1,4 +1,5 @@
 package com.example.registrationlogindemo.service.Impl;
+
 import com.example.registrationlogindemo.entity.TestResult;
 import com.example.registrationlogindemo.repository.TestResultRepository;
 import com.example.registrationlogindemo.service.TestResultService;
@@ -8,26 +9,33 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 @Service
 public class TestResultServiceImpl implements TestResultService {
 
+
     @Autowired
     private TestResultRepository testResultRepository;
 
-    private final String pdfOutputDirectory = "C:/Users/RavinduK/OneDrive/Desktop/advance programming/test-lab/src/main/resources/static/uploads";
+    private final String pdfOutputDirectory = "D:/ABC 2/test-lab/src/main/resources/static/uploads";
 
     @Override
     public TestResult saveTestResult(TestResult testResult) {
-        return testResultRepository.save(testResult);
+        // Save the test result to the database
+        TestResult savedTestResult = testResultRepository.save(testResult);
+
+        // Generate and save PDF document
+        generateAndSavePDF(savedTestResult.getId());
+
+        return savedTestResult;
     }
 
-    @Override
-    public byte[] generatePDF(Long testResultId) {
+    private void generateAndSavePDF(Long testResultId) {
+        // Retrieve the test result from the database
         TestResult testResult = testResultRepository.findById(testResultId)
                 .orElseThrow(() -> new RuntimeException("Test result not found with ID: " + testResultId));
 
@@ -57,18 +65,21 @@ public class TestResultServiceImpl implements TestResultService {
 
             document.save(outputStream);
 
+            // Generate a unique file name
+            String fileName = "test_result_" + testResultId + "_" + System.currentTimeMillis() + ".pdf";
             // Save the PDF to disk
-            String filePath = pdfOutputDirectory + "/test_result_" + testResultId + ".pdf";
+            String filePath = pdfOutputDirectory + "/" + fileName;
             try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
                 outputStream.writeTo(fileOutputStream);
             }
-
-            return outputStream.toByteArray();
         } catch (IOException e) {
             e.printStackTrace(); // Handle exception properly
-            return null;
         }
     }
+
+    @Override
+    public byte[] generatePDF(Long testResultId) {
+        // This method is not used for saving PDFs to disk; it's only for downloading PDFs
+        throw new UnsupportedOperationException("Method not supported");
+    }
 }
-
-

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 @CrossOrigin
@@ -32,7 +33,7 @@ public class AppointmentController {
 
     @PostMapping("/make")
     public ResponseEntity<String> makeAppointment(@RequestBody AppointmentDto appointmentDto,
-                                  HttpSession httpSession) {
+                                                  HttpSession httpSession) {
         try {
             // Retrieve patient ID and email from the session
             Integer patientIdInteger = (Integer) httpSession.getAttribute("patientId");
@@ -66,11 +67,18 @@ public class AppointmentController {
     @PostMapping("/appointments/{appointmentId}/uploadReport")
     public ResponseEntity<String> uploadReport(@PathVariable int appointmentId,
                                                @RequestParam("file") MultipartFile file) throws IOException {
-        System.out.println("appointmentid"+appointmentId);
-        appointmentService.uploadReport(appointmentId, file);
-        return ResponseEntity.ok("File uploaded successfully");
+        try {
+            System.out.println("appointmentid" + appointmentId);
+            appointmentService.uploadReport(appointmentId, file);
+            return ResponseEntity.ok("File uploaded successfully");
+        } catch (FileAlreadyExistsException e) {
+            // Handle the case where the file already exists
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("A file with the same name already exists");
+        } catch (IOException e) {
+            // Handle other IOExceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file: " + e.getMessage());
+        }
     }
-
 
     @GetMapping("/view")
     public String getAppointments(Model model, HttpSession session) {

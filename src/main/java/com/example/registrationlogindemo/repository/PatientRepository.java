@@ -7,4 +7,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     Patient findByEmailAndPassword(String email, String password);
     Patient findByEmail(String email);
+
+    boolean existsByEmail(String email); // Custom query method to check if email exists
 }

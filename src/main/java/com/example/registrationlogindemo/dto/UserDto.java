@@ -21,8 +21,4 @@ public class UserDto {
     public static UserDto fromUser(User user) {
         return new UserDto(user.getEmail(), user.getPassword(), user.getUserType());
     }
-
-//    public static List<UserDto> fromUserList(List<User> userList) {
-//        return userList.stream().map(UserDto::fromUser).collect(Collectors.toList());
-//    }
 }

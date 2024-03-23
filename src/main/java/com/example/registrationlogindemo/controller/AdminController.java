@@ -1,14 +1,10 @@
 package com.example.registrationlogindemo.controller;
 
+
 import com.example.registrationlogindemo.dto.UserDto;
-import com.example.registrationlogindemo.entity.ContactMessage;
 import com.example.registrationlogindemo.entity.User;
-import com.example.registrationlogindemo.repository.ContactMessageRepository;
 import com.example.registrationlogindemo.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.example.registrationlogindemo.dto.AppointmentDto;
-import com.example.registrationlogindemo.entity.Appointment;
-import com.example.registrationlogindemo.service.AppointmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,7 +65,7 @@ public class AdminController {
     }
 
 
-@GetMapping("/index")
+    @GetMapping("/index")
     public String showhome(){
         return "index";
     }

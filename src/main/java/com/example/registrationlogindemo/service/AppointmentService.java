@@ -21,5 +21,5 @@ public interface AppointmentService {
     byte[] getReportForAppointment(int patientId, int appointmentId);
 
     void cancelAppointment(int id);
-    
+
 }

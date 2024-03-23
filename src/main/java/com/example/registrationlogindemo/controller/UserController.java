@@ -1,7 +1,7 @@
 package com.example.registrationlogindemo.controller;
 
+
 import com.example.registrationlogindemo.dto.UserDto;
-import com.example.registrationlogindemo.entity.Appointment;
 import com.example.registrationlogindemo.entity.User;
 import com.example.registrationlogindemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,4 @@ public class UserController {
         System.out.println("userlist"+userList);
         return new ResponseEntity<>(userList, HttpStatus.OK);
     }
-
-
 }

@@ -5,10 +5,8 @@ import com.example.registrationlogindemo.entity.Appointment;
 import com.example.registrationlogindemo.repository.AppointmentRepository;
 import com.example.registrationlogindemo.service.AppointmentService;
 import com.example.registrationlogindemo.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,18 +30,38 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public void makeAppointment(AppointmentDto appointmentDto, Long patientId, String patientEmail) {
+        LocalDate currentDate = LocalDate.now();
+        LocalTime minTime = LocalTime.of(8, 0);
+        LocalTime maxTime = LocalTime.of(20, 0);
+
         Appointment appointment = new Appointment();
         appointment.setAppointmentDate(LocalDate.parse(appointmentDto.getAppointmentDate()));
         appointment.setAppointmentTime(LocalTime.parse(appointmentDto.getAppointmentTime()));
         appointment.setTestType(appointmentDto.getTestType());
         appointment.setPatientId(Math.toIntExact(patientId));
         appointment.setPatientEmail(patientEmail);
-        appointment.setStatus(appointmentDto.getStatus());
+
+        // Validate appointment date
+        if (appointment.getAppointmentDate().isBefore(currentDate)) {
+            throw new IllegalArgumentException("Appointment date cannot be in the past");
+        }
+
+        // Validate appointment time
+        if (appointment.getAppointmentTime().isBefore(minTime) || appointment.getAppointmentTime().isAfter(maxTime)) {
+            throw new IllegalArgumentException("Appointment time should be between 8 am to 8 pm");
+        }
+
+        // Ensure appointment date is not the present day
+        if (appointment.getAppointmentDate().isEqual(currentDate)) {
+            throw new IllegalArgumentException("You cannot make appointments for the present day");
+        }
+
+        appointment.setStatus(appointmentDto.getStatus()); // Set status to "pending"
         appointment.setReport(appointmentDto.getReport());
-        System.out.println("appointment" + appointment);
+
         appointmentRepository.save(appointment);
 
-
+        // Hardcoded laboratory information
         String laboratoryName = "ABC Laboratory";
         String laboratoryEmail = "abclab@example.com";
         String laboratoryPhoneNumber = "077 123 4567";
@@ -66,7 +84,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         emailService.sendAppointmentDetailsEmail(to, subject, text);
     }
 
-        @Override
+    @Override
     public List<Appointment> getAppointmentsByUserId(Integer patientId) {
         return appointmentRepository.findByPatientId(patientId);
     }
@@ -83,8 +101,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findByAppointmentId(appointmentId);
         if (appointment != null) {
             if (!report.isEmpty()) {
-                // Get the file name
-                String fileName = report.getOriginalFilename();
+                // Generate a unique filename
+                String fileName = generateUniqueFileName(report.getOriginalFilename());
                 // Set the path where the file will be saved
                 Path filePath = Paths.get(UPLOAD_DIR + fileName);
                 // Save the file to the specified directory
@@ -100,8 +118,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         } else {
             throw new IllegalArgumentException("Appointment not found with ID: " + appointmentId);
         }
+    }
 
-
+    private String generateUniqueFileName(String originalFileName) {
+        // Generate a unique filename based on the original filename and current timestamp
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String[] fileNameParts = originalFileName.split("\\.");
+        String fileExtension = fileNameParts[fileNameParts.length - 1]; // Get the file extension
+        return timestamp + "." + fileExtension;
     }
 
     @Override
@@ -117,7 +141,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private AppointmentDto convertToDto(Appointment appointment) {
         AppointmentDto appointmentDto = new AppointmentDto();
-        // Assuming you have appropriate getter methods in Appointment entity
         appointmentDto.setAppointmentId(String.valueOf(appointment.getAppointmentId()));
         appointmentDto.setTestType(appointment.getTestType());
         appointmentDto.setStatus(appointment.getStatus());
@@ -128,7 +151,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     public byte[] getReportForAppointment(int patientId, int appointmentId) {
         Appointment appointment = appointmentRepository.findByPatientIdAndAppointmentId(patientId, appointmentId);
         if (appointment != null) {
-            String reportPath = appointment.getReport(); // Assuming the report path is stored as a String
+            String reportPath = appointment.getReport(); // Report path String
             Path filePath = Paths.get(reportPath);
             try {
                 return Files.readAllBytes(filePath);
@@ -144,7 +167,5 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void cancelAppointment(int id) {
         appointmentRepository.deleteById(Long.valueOf(id));
     }
-
-
-    }
+}
 
