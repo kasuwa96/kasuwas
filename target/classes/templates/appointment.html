@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Appointment</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navbar -->
+    
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">ABC Laboratories</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="/appointments">Make Appointments</a>
+          </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/view">View Appointments</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/test">Test Results</a>
+        </li>
+
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+       
+      
+      </ul>
+    </div>
+  </nav>
+
+    <!-- Content -->
+    <div class="container mt-5">
+        <h2>Make Appointment</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="appointmentDate">Date:</label>
+                <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required>
+            </div>
+            <div class="form-group">
+                <label for="appointmentTime">Time:</label>
+                <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" required>
+            </div>
+            <div class="form-group">
+                <label for="testType">Test Type:</label>
+                <input type="text" class="form-control" id="testType" name="testType" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Make Appointment</button>
+        </form>
+    </div>
+
+    
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Your Clinic Name &copy; 2024</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap and jQuery JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Appointment Script -->
+    <script>
+        // Function to handle form submission
+        function handleFormSubmission(event) {
+            event.preventDefault();
+
+            // Get form data
+            var formData = {
+                appointmentDate: document.getElementById("appointmentDate").value,
+                appointmentTime: document.getElementById("appointmentTime").value,
+                testType: document.getElementById("testType").value
+            };
+
+            // Perform validation
+            if (!validateAppointment(formData)) {
+                
+                return;
+            }
+
+            // Send POST request to backend
+            fetch('/make', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to create appointment');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert(data);
+                    // Optionally, you can redirect the user to another page or refresh the current page
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to create appointment');
+                });
+        }
+
+        // Function to validate appointment details
+        function validateAppointment(formData) {
+            // Get current date and time
+            var currentDate = new Date();
+            var currentHour = currentDate.getHours();
+
+            // Validate if the selected date is today or future date
+            var selectedDate = new Date(formData.appointmentDate);
+            if (selectedDate <= currentDate) {
+                alert("Please select a future date.");
+                return false;
+            }
+
+            // Validate if the selected time is between 8:00 AM and 8:00 PM
+            var selectedTime = formData.appointmentTime.split(':');
+            var selectedHour = parseInt(selectedTime[0]);
+            if (selectedHour < 8 || selectedHour >= 20) {
+                alert("Appointments can only be scheduled between 8:00 AM and 8:00 PM.");
+                return false;
+            }
+
+            return true; // All validations passed
+        }
+
+
+        // Add event listener to form
+        document.getElementById("appointmentForm").addEventListener("submit", handleFormSubmission);
+    </script>
+
+
+
+
+</body>
+</html>

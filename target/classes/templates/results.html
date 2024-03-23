@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technician Dashboard</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-block-start: 60px;
+    }
+  </style>
+</head>
+<body>
+    <h2>Lab Appointment System - Submit Test Results</h2>
+    <form id="testResultForm">
+        <label for="patientId">Patient ID:</label>
+        <input type="text" id="patientId" name="patientId"><br><br>
+        
+        <label for="appointmentId">Appointment ID:</label>
+        <input type="text" id="appointmentId" name="appointmentId"><br><br>
+        
+        <label for="testType">Test Type:</label>
+        <input type="text" id="testType" name="testType"><br><br>
+        
+        <label for="testResults">Test Results:</label>
+        <textarea id="testResults" name="testResults"></textarea><br><br>
+        
+        <label for="doctorName">Doctor Name:</label>
+        <input type="text" id="doctorName" name="doctorName"><br><br>
+        
+        <label for="labTechnicianName">Lab Technician Name:</label>
+        <input type="text" id="labTechnicianName" name="labTechnicianName"><br><br>
+        
+        <input type="submit" value="Submit">
+        <a href="#" onclick="downloadPDF(123)">Download PDF for Test Result ID 123</a>
+    </form>
+
+     <script>
+        document.getElementById("testResultForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var formData = new FormData(this); // Create FormData object to store form data
+            var xhr = new XMLHttpRequest(); // Create XMLHttpRequest object
+
+            xhr.open("POST", "/test-results"); // Specify the request method and URL
+            xhr.setRequestHeader("Content-Type", "application/json"); // Set the request header
+            xhr.responseType = "json"; // Specify the response type
+
+            // Define a function to handle the response
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // If request is successful, display a success message
+                    alert("Test results submitted successfully!");
+                    // You can redirect the user to another page or perform other actions here
+                } else {
+                    // If request fails, display an error message
+                    alert("Failed to submit test results. Please try again later.");
+                }
+            };
+
+            // Convert FormData to JSON format
+            var jsonData = {};
+            formData.forEach(function(value, key){
+                jsonData[key] = value;
+            });
+
+            // Send the request with JSON data
+            xhr.send(JSON.stringify(jsonData));
+        });
+    </script>
+
+    <script>
+        // Function to download PDF
+        function downloadPDF(testResultId) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/{testResultId}/pdf" + testResultId + "/pdf", true);
+            xhr.responseType = "blob";
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var blob = xhr.response;
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = 'test_result_' + testResultId + '.pdf';
+                    link.click();
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</body>
+</html>

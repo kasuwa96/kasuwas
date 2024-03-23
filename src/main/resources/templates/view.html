@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Appointments</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navigation bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">ABC Laboratories</a>
+    <!-- Other navbar links here -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/appointment">Make Appointments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/view">View Appointments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/test">Test Results</a>
+            </li>
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2>Your Appointments</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Appointment ID</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Test Type</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="appointment : ${appointments}">
+            <td th:text="${appointment.appointmentId}"></td>
+            <td th:text="${appointment.appointmentDate}"></td>
+            <td th:text="${appointment.appointmentTime}"></td>
+            <td th:text="${appointment.testType}"></td>
+            <td>
+                <button class="btn btn-danger" th:onclick="'deleteAppointment(' + ${appointment.appointmentId} + ')'" >Cancel</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap and jQuery JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function deleteAppointment(appointmentId) {
+        if (confirm("Are you sure you want to cancel this appointment?")) {
+            // Send an AJAX request to delete the appointment
+            fetch('/appointments/' + appointmentId, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the page after successful deletion
+                    location.reload();
+                } else {
+                    alert('Failed to cancel appointment');
+                }
+            })
+            .catch(error => {
+                console.error('Error cancelling appointment:', error);
+                alert('Failed to cancel appointment');
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

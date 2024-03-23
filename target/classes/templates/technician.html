@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technician Dashboard</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-block-start: 60px;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Technician Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/results">Test Resulsts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/adminLogin">Log Out</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <div id="appointment-details">
+    <h2>Appointment Details</h2>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Appointment ID</th>
+        <th>Test Type</th>
+        <th>Patient ID</th>
+        <th>Upload</th>
+      </tr>
+      </thead>
+      <tbody id="appointment-table-body">
+      <!-- Appointment details will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<script>
+  // Function to load appointments
+  function loadAppointments() {
+    // Fetch appointment data from the backend
+    fetch("/api/appointments")
+      .then(response => response.json())
+      .then(data => {
+        // Clear previous data in the table body
+        const appointmentTableBody = document.getElementById("appointment-table-body");
+        appointmentTableBody.innerHTML = "";
+
+        // Iterate through each appointment and add it to the table
+        data.forEach(appointment => {
+          const row = `
+            <tr>
+              <td>${appointment.appointmentId}</td>
+              <td>${appointment.testType}</td>
+              <td>${appointment.patientId}</td>
+              <td>
+                <input type="file" id="resultFile_${appointment.appointmentId}" accept=".pdf">
+                <button onclick="uploadResult(${appointment.appointmentId})">Upload</button>
+                <span id="resultMessage_${appointment.appointmentId}"></span>
+              </td>
+            </tr>
+          `;
+          appointmentTableBody.innerHTML += row;
+        });
+      })
+      .catch(error => console.error("Error:", error));
+
+  }   
+
+  // Call the function to load appointments when the page loads
+  loadAppointments();
+
+  // Function to handle upload button click
+  function uploadResult(appointmentId) {
+    const fileInput = document.getElementById(`resultFile_${appointmentId}`);
+    const resultMessage = document.getElementById(`resultMessage_${appointmentId}`);
+
+    // Check if a file is selected
+    if (fileInput.files.length === 0) {
+      resultMessage.textContent = "Please select a file";
+      return;
+    }
+
+    // Perform the upload operation (you need to implement this part)
+    // Example: You can use fetch() to send the file to the server
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch(`/appointments/${appointmentId}/uploadReport`, {
+      method: "POST",
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        resultMessage.textContent = "Upload successful";
+        // Optionally, you can reload appointments after successful upload
+        // loadAppointments();
+      } else {
+        resultMessage.textContent = "Upload failed";
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      resultMessage.textContent = "Upload failed";
+    });
+  }
+</script>
+</body>
+</html>

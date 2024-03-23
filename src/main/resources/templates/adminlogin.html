@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">ABC Laboratories</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/index">Back</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <h2>Administration Login</h2>
+    <form id="loginForm">
+        <label for="email">Email:</label><br>
+        <input type="email" class="form-control" id="email" name="email" required><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" class="form-control"  id="password" name="password" required><br>
+
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Get form data
+        const formData = new FormData(this);
+
+        // Convert form data to JSON
+        const jsonData = {};
+        formData.forEach((value, key) => {
+            jsonData[key] = value;
+        });
+
+        // Send JSON data to backend for authentication
+        fetch("/userLogin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(jsonData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response from backend
+            console.log(data);
+            // Redirect user based on response
+            if (data) {
+                if (data.userType === "Admin") {
+                    window.location.href = "/admin";
+                } else if (data.userType === "Technician") {
+                    window.location.href = "/technician";
+                } else {
+                    window.location.href = "/adminLogin";
+                }
+            } else {
+                alert("Invalid username or password.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+  </script>
+
+</body>
+</html>
